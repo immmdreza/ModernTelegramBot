@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>ModernTelegramBot</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Immmdreza</Authors>
+    <Company>GitHub</Company>
+    <PackageDescription>This is modern version of Telegram.Bot for c#</PackageDescription>
+    <RepositoryUrl>https://github.com/immmdreza/ModernTelegramBot</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>
