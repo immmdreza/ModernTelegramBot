@@ -7,6 +7,9 @@ the package is for c# and **.Net Core 3.1 and higher **
 ## Installation 
 You can install this package using GitHub that is avaliable in this repo
 
+The package is also available at nuget.org:
+_https://www.nuget.org/packages/ModernTelegramBot/_
+
 ## Usage
 This package keeps everything that is in [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) project, so for basic stuff take a look at it.
 
