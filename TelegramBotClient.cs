@@ -234,6 +234,12 @@ namespace Telegram.Bot
         }
 
 
+        public static void StopPropagation()
+        {
+            throw new StopPropagation();
+        }
+
+
         public async Task Dispatcher(
             UpdateType[] allowed = null,
             Func<TelegramBotClient, Exception, Task> ErrorHandler = null, 
