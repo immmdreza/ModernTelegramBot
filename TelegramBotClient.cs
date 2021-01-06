@@ -17,6 +17,7 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Exceptions;
 using Telegram.Handlers;
 using File = Telegram.Bot.Types.File;
 
@@ -216,12 +217,22 @@ namespace Telegram.Bot
         }
 
 
-        private readonly List<IHandler> _handlers = new List<IHandler>();
+        private readonly Dictionary<int, List<IHandler>> _groupedHandlers = new Dictionary<int, List<IHandler>>();
 
-        public void AddHandler(IHandler handler)
+        public void AddHandler(IHandler handler, int group = 0)
         {
-            _handlers.Add(handler);
+            if (_groupedHandlers.ContainsKey(group))
+            {
+                _groupedHandlers[group].Add(handler);
+            }
+            else
+            {
+                _groupedHandlers.Add(group, new List<IHandler> { handler });
+            }
+
+           _groupedHandlers.OrderBy(x => x.Key);
         }
+
 
         public async Task Dispatcher(
             UpdateType[] allowed = null,
@@ -273,32 +284,41 @@ namespace Telegram.Bot
                             }
 
                             var updatObj = update.GetUpdateObj();
-                            
-                            foreach (var item in _handlers) {
-                                if (item.UpdateType == update.Type) {
-                                    if (item.Filter == null) {
-                                        //await item.CallBack(this, updatObj, null);
-                                        await Director(item, updatObj, null);
-                                        break;
-                                    }
 
-                                    item.Filter.SetUpdate(update);
-                                    item.Filter.SetBotInfo(BotInfo);
-                                    Filters.FilterResult p = item.Filter.ShouldProcess();
-                                    if (p) {
-                                        Dictionary<string, dynamic> data = new Dictionary<string, dynamic>();
-                                        if (p.Data is Dictionary<string, dynamic>) {
-                                            data = p.Data;
-                                        }
-                                        else {
-                                            data.Add(p.Name, p.Data);
-                                        }
+                            foreach (var value in _groupedHandlers.Values) {
+                                try {
+                                    foreach (var item in value) {
+                                        if (item.UpdateType == update.Type) {
+                                            if (item.Filter == null) {
+                                                //await item.CallBack(this, updatObj, null);
+                                                await Director(item, updatObj, null);
+                                                break;
+                                            }
 
-                                        // await item.CallBack(this, updatObj, data);
-                                        await Director(item, updatObj, data);
-                                        break;
+                                            item.Filter.SetUpdate(update);
+                                            item.Filter.SetBotInfo(BotInfo);
+                                            Filters.FilterResult p = item.Filter.ShouldProcess();
+                                            if (p) {
+                                                Dictionary<string, dynamic> data = new Dictionary<string, dynamic>();
+                                                if (p.Data is Dictionary<string, dynamic>) {
+                                                    data = p.Data;
+                                                }
+                                                else {
+                                                    data.Add(p.Name, p.Data);
+                                                }
+
+                                                // await item.CallBack(this, updatObj, data);
+                                                await Director(item, updatObj, data);
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
+                                catch (StopPropagation)
+                                {
+                                    break;
+                                }
+                                catch { throw; }
                             }
                         }
                         catch(Exception e) {
