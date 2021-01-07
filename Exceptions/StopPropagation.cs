@@ -6,7 +6,6 @@ namespace Telegram.Exceptions
     {
         public StopPropagation()
         {
-            Console.WriteLine("Handler chaine breaked!");
         }
     }
 }
