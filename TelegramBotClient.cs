@@ -160,8 +160,9 @@ namespace Telegram.Bot
         /// <param name="token">API token</param>
         /// <param name="httpClient">A custom <see cref="HttpClient"/></param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="token"/> format is invalid</exception>
-        public TelegramBotClient(string token, HttpClient httpClient = null)
+        public TelegramBotClient(string token, HttpClient httpClient = null, bool logActions = true)
         {
+            this.logActions = logActions;
             _token = token ?? throw new ArgumentNullException(nameof(token));
             string[] parts = _token.Split(':');
             if (parts.Length > 1 && int.TryParse(parts[0], out int id))
@@ -190,8 +191,9 @@ namespace Telegram.Bot
         /// <param name="token">API token</param>
         /// <param name="webProxy">Use this <see cref="IWebProxy"/> to connect to the API</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="token"/> format is invalid</exception>
-        public TelegramBotClient(string token, IWebProxy webProxy)
+        public TelegramBotClient(string token, IWebProxy webProxy, bool logActions = true)
         {
+            this.logActions = logActions;
             _token = token ?? throw new ArgumentNullException(nameof(token));
             string[] parts = _token.Split(':');
             if (int.TryParse(parts[0], out int id))
@@ -217,7 +219,7 @@ namespace Telegram.Bot
         }
 
 
-        private readonly Dictionary<int, List<IHandler>> _groupedHandlers = new Dictionary<int, List<IHandler>>();
+        private Dictionary<int, List<IHandler>> _groupedHandlers = new Dictionary<int, List<IHandler>>();
 
         public void AddHandler(IHandler handler, int group = 0)
         {
@@ -230,7 +232,7 @@ namespace Telegram.Bot
                 _groupedHandlers.Add(group, new List<IHandler> { handler });
             }
 
-           _groupedHandlers.OrderBy(x => x.Key);
+            _groupedHandlers = _groupedHandlers.OrderBy(x => x.Key).ToDictionary(x=> x.Key, x=> x.Value);
         }
 
 
@@ -239,6 +241,7 @@ namespace Telegram.Bot
             throw new StopPropagation();
         }
 
+        private readonly bool logActions;
 
         public async Task Dispatcher(
             UpdateType[] allowed = null,
@@ -259,9 +262,12 @@ namespace Telegram.Bot
                 {
                     Offset = -1
                 }, token).ConfigureAwait(false);
-                Console.WriteLine("Queue reset!");
+                if(logActions)
+                    Console.WriteLine("Queue reset!");
             }
 
+            if(logActions)
+                Console.WriteLine($"Getting updates from {BotInfo.Username} ({BotInfo.Id})");
             while (!token.IsCancellationRequested) {
                 int timeout = (int)Timeout.TotalSeconds;
                 Update[] updates = emptyUpdates;
@@ -322,6 +328,8 @@ namespace Telegram.Bot
                                 }
                                 catch (StopPropagation)
                                 {
+                                    if(logActions)
+                                        Console.WriteLine("Handler chaine breaked!");
                                     break;
                                 }
                                 catch { throw; }
