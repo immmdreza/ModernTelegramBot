@@ -112,6 +112,8 @@ You should always add a handler attribute then add your filters
 
 Every Filter attribute has a Reverse property that do the same as ~, and reverses the filter
 
+And just that easy you can handle __/start__ Command which is not replied and sent in private chat
+
 ```cs
 using System.Collections.Generic;
 using System.Threading.Tasks;
