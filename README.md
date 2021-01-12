@@ -101,6 +101,52 @@ namespace TestMTB
 }
 ```
 
+## Using Attributes
+*And yes*, you can setup your handlers easy and fast using attributes.
+
+You can add EVERY `public` and `static` `method` in your entry assembly as callback for your handler.
+
+### Here is an example
+
+You should always add a handler attribute then add your filters
+
+Every Filter attribute has a Reverse property that do the same as ~, and reverses the filter
+
+```cs
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Telegram.Attributes;
+using Telegram.Attributes.Filters;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Filters;
+using Telegram.Handlers;
+
+namespace TestPackage
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            TelegramBotClient bot = new TelegramBotClient("BOT_TOKEN");
+
+            await bot.Dispatcher();
+        }
+
+
+        [MessageHandler]
+        [CommandFilter("start")]
+        [ReplyFilter(Reverse = true)]
+        [PrivateFilter]
+        public static async Task CallBack(TelegramBotClient client, Message message, Dictionary<string, dynamic> data)
+        {
+            await message.ReplyText("OK");
+        }
+    }
+}
+```
+
+
 Current features are almost tested.
 
 This project has many things left to do yet!
