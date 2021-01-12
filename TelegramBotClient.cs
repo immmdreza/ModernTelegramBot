@@ -7,6 +7,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Telegram.Attributes;
+using Telegram.Attributes.Filters;
 using Telegram.Bot.Args;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Requests;
@@ -18,6 +20,7 @@ using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Exceptions;
+using Telegram.Filters;
 using Telegram.Handlers;
 using File = Telegram.Bot.Types.File;
 
@@ -219,6 +222,85 @@ namespace Telegram.Bot
         }
 
 
+        private Dictionary<string, Filter> _customFilters = new Dictionary<string, Filter>();
+
+
+        public void AddCustomFilter(string tag, Filter filter)
+        {
+            _customFilters.Add(tag, filter);
+        }
+
+        public void RemoveCustomFilter(string tag)
+        {
+            _customFilters.Remove(tag);
+        }
+
+
+        private int AddAttributeHandlers()
+        {
+            int foundCount = 0;
+            foreach (var item in System.Reflection.Assembly.GetEntryAssembly().GetTypes().Where(x => x.IsClass))
+            {
+                foreach (var m in item.GetMethods())
+                {
+                    var allAttr = Attribute.GetCustomAttributes(m);
+                    var handlerAttr = (HandlerAttribute)allAttr.FirstOrDefault(x => x is HandlerAttribute);
+                    Attribute[] filterAttrs = new Attribute[] { };
+                    if (handlerAttr != null)
+                        filterAttrs = allAttr.Where(x => x is FilterAttribute).ToArray();
+                    else
+                        continue;
+
+                    Filter resultFilter = null;
+                    if (filterAttrs.Any())
+                    {  
+                        foreach (var filterAttribute in filterAttrs.Cast<FilterAttribute>())
+                        {
+                            resultFilter += filterAttribute.ResultFilter;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(handlerAttr.FilterTag))
+                    {
+                        if (_customFilters.TryGetValue(handlerAttr.FilterTag, out Filter filter))
+                        {
+                            resultFilter += filter;
+                        }
+                    }
+
+                    if(handlerAttr is MessageHandlerAttribute)
+                    {
+                        var callback = (Func<TelegramBotClient, Message, Dictionary<string, dynamic>, Task>)m.CreateDelegate(
+                            typeof(Func<TelegramBotClient, Message, Dictionary<string, dynamic>, Task>));
+
+                        AddHandler(new MessageHandler(callback, resultFilter), handlerAttr.Group);
+                        foundCount ++;
+                        break;
+                    }
+                    else if (handlerAttr is CallBackQueryHandlerAttribute)
+                    {
+                        var callback = (Func<TelegramBotClient, CallbackQuery, Dictionary<string, dynamic>, Task>)m.CreateDelegate(
+                            typeof(Func<TelegramBotClient, CallbackQuery, Dictionary<string, dynamic>, Task>));
+
+                        AddHandler(new CallBackQueryHandler(callback, resultFilter), handlerAttr.Group);
+                        foundCount++;
+                        break;
+                    }
+                    else if (handlerAttr is InlineQueryHandlerAttribute)
+                    {
+                        var callback = (Func<TelegramBotClient, InlineQuery, Dictionary<string, dynamic>, Task>)m.CreateDelegate(
+                            typeof(Func<TelegramBotClient, InlineQuery, Dictionary<string, dynamic>, Task>));
+
+                        AddHandler(new InlineQueryHandler(callback, resultFilter), handlerAttr.Group);
+                        foundCount++;
+                        break;
+                    }
+                    
+                }
+            }
+            return foundCount;
+        }
+
         private Dictionary<int, List<IHandler>> _groupedHandlers = new Dictionary<int, List<IHandler>>();
 
         public void AddHandler(IHandler handler, int group = 0)
@@ -252,6 +334,10 @@ namespace Telegram.Bot
         {
             if (IsReceiving)
                 throw new Exception("You can't use this while client is receiving.");
+
+            var found = AddAttributeHandlers();
+            if (logActions && found > 0)
+                Console.WriteLine($"{found} Attributed handlers found!");
 
             UpdateType[]? allowedUpdates = allowed;
             int messageOffset = 0;

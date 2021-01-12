@@ -8,10 +8,7 @@ First of all: the base of these codes is a Copy of [Telegram.Bot](https://github
 the package is for c# and **.Net Core 3.1 and higher **
 
 ## Installation 
-You can install this package using GitHub that is avaliable in this repo
 
-The package is also available at nuget.org:
-_https://www.nuget.org/packages/ModernTelegramBot/_ (suggested)
 
 ## Usage
 This package keeps everything that is in [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) project, so for basic stuff take a look at it.
@@ -103,6 +100,54 @@ namespace TestMTB
     }
 }
 ```
+
+## Using Attributes
+*And yes*, you can setup your handlers easy and fast using attributes.
+
+You can add EVERY `public` and `static` `method` in your entry assembly as callback for your handler.
+
+### Here is an example
+
+You should always add a handler attribute then add your filters
+
+Every Filter attribute has a Reverse property that do the same as ~, and reverses the filter
+
+And just that easy you can handle __/start__ Command which is not replied and sent in private chat
+
+```cs
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Telegram.Attributes;
+using Telegram.Attributes.Filters;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Filters;
+using Telegram.Handlers;
+
+namespace TestPackage
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            TelegramBotClient bot = new TelegramBotClient("BOT_TOKEN");
+
+            await bot.Dispatcher();
+        }
+
+
+        [MessageHandler]
+        [CommandFilter("start")]
+        [ReplyFilter(Reverse = true)]
+        [PrivateFilter]
+        public static async Task CallBack(TelegramBotClient client, Message message, Dictionary<string, dynamic> data)
+        {
+            await message.ReplyText("OK");
+        }
+    }
+}
+```
+
 
 Current features are almost tested.
 
