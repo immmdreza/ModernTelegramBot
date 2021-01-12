@@ -35,7 +35,12 @@ namespace Telegram.Filters
             if (_filters != null)
             {
                 foreach (var f in _filters)
+                {
+                    if (f is null)
+                        continue;
+
                     f.SetUpdate(update);
+                }
             }
         }
 
@@ -45,7 +50,12 @@ namespace Telegram.Filters
             if (_filters != null)
             {
                 foreach (var f in _filters)
-                    f.SetBotInfo(user);
+                {
+                    if (f != null)
+                    {
+                        f.SetBotInfo(user);
+                    }
+                }
             }
         }
 
@@ -63,6 +73,9 @@ namespace Telegram.Filters
 
             foreach(Filter f in _filters)
             {
+                if (f is null)
+                    continue;
+
                 var p = f.ShouldProcess();
                 if (!p && !f.inverse)
                 {
@@ -84,22 +97,28 @@ namespace Telegram.Filters
         public static Filter operator +(Filter a, Filter b)
         {
             var all = new List<Filter>();
-            if(a._filters is null)
+            if (a != null)
             {
-                all.Add(a);
-            }
-            else
-            {
-                all = all.Union(a._filters).ToList();
+                if (a._filters is null)
+                {
+                    all.Add(a);
+                }
+                else
+                {
+                    all = all.Union(a._filters).ToList();
+                }
             }
 
-            if (b._filters is null)
+            if (b != null)
             {
-                all.Add(b);
-            }
-            else
-            {
-                all = all.Union(b._filters).ToList();
+                if (b is null || b._filters is null)
+                {
+                    all.Add(b);
+                }
+                else
+                {
+                    all = all.Union(b._filters).ToList();
+                }
             }
 
             //all = ((a._filters??new List<Filter>()).Union(b._filters??new List<Filter>())).ToList();

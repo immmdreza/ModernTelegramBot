@@ -10,6 +10,13 @@ namespace Telegram.Handlers
 {
     class InlineQueryHandler : IHandler
     {
+        public InlineQueryHandler(Func<TelegramBotClient, InlineQuery, Dictionary<string, dynamic>, Task> callBack, Filter filter = null)
+        {
+            UpdateType = UpdateType.Message;
+            CallBack = callBack;
+            Filter = filter;
+        }
+
         public Filter Filter { get; set; }
         public Func<TelegramBotClient, InlineQuery, Dictionary<string, dynamic>, Task> CallBack { get; set; }
         public UpdateType UpdateType { get; set; }

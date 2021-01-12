@@ -20,5 +20,6 @@ namespace Telegram.Handlers
         public Filter Filter { get; set; }
         public Func<TelegramBotClient, Message, Dictionary<string, dynamic>, Task> CallBack { get; set; }
         public UpdateType UpdateType { get; set; }
+
     }
 }
