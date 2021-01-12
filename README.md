@@ -5,9 +5,8 @@ First of all: the base of these codes is a Copy of [Telegram.Bot](https://github
 the package is for c# and **.Net Core 3.1 and higher **
 
 ## Installation 
-You can install this package using GitHub that is avaliable in this repo
 
-The package is also available at nuget.org:
+The package is available at nuget.org:
 _https://www.nuget.org/packages/ModernTelegramBot/_
 
 ## Usage
