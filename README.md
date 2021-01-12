@@ -1,4 +1,7 @@
-# ModernTelegramBot
+# ModernTelegramBot 
+
+![.NET](https://github.com/immmdreza/ModernTelegramBot/workflows/.NET/badge.svg)
+
 An updated Telegram.Bot package
 First of all: the base of these codes is a Copy of [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot)
 
@@ -6,8 +9,6 @@ the package is for c# and **.Net Core 3.1 and higher **
 
 ## Installation 
 
-The package is available at nuget.org:
-_https://www.nuget.org/packages/ModernTelegramBot/_
 
 ## Usage
 This package keeps everything that is in [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) project, so for basic stuff take a look at it.
