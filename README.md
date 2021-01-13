@@ -12,6 +12,8 @@ the package is for c# and **.Net Core 3.1 and higher **
 Use Nuget : https://www.nuget.org/packages/ModernTelegramBot/
 
 ## Usage
+Read more in [Wiki](https://github.com/immmdreza/ModernTelegramBot/wiki)
+
 This package keeps everything that is in [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) project, so for basic stuff take a look at it.
 
 ### Extra features 
